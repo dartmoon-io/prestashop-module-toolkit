@@ -16,7 +16,6 @@ Create `app/Hooks/HomeMessageHook.php`:
 
 ```php
 <?php
-
 namespace Acme\MyModule\Hooks;
 
 use Dartmoon\Hooks\AbstractHookGroup;
@@ -96,4 +95,16 @@ from a handler propagate to its caller. A non-hook method invoked through the
 trait raises `BadMethodCallException`.
 
 Use one handler for hooks that return structured data. For media registration,
-follow the starter's `actionFrontControllerSetMedia` group and return no output.
+use native media registration hooks when needed; the starter display header groups return tags.
+
+## Inject handlers and replace dispatching
+
+Override `createHookGroup(string|HookGroup $group): HookGroup` in the module to
+construct handlers with extra dependencies or resolve them from the host
+container. The default also accepts preconstructed `HookGroup` objects in
+`$hooks`. Override `createHookDispatcher(): Contracts\HookDispatcher` to replace
+the dispatcher. Its public contract is `register()`, `getAvailableHooks()` and
+`dispatch()`. Lifecycle hook registration continues to use the same contract.
+
+See the [public API reference](../api.md) for parameters, defaults, return types
+and declared errors, and [extension points](../extensions.md) for replacement strategies.

@@ -1,11 +1,17 @@
 <?php
 
+/**
+ * Copyright (c) 2023-2026 Dartmoon S.r.l. <hello@dartmoon.io>
+ * SPDX-License-Identifier: MIT
+ * See LICENSE for the full license text.
+ */
+
 declare(strict_types=1);
 
 namespace Dartmoon\Assets;
 
 /** Resolve Vite entries and render the tags returned by PrestaShop display hooks. */
-final class AssetManager
+class AssetManager
 {
     private ?array $manifest = null;
 
@@ -17,9 +23,9 @@ final class AssetManager
         $this->assertRelativePath($buildDirectory);
     }
 
-    public static function forModule(\Module $module, string $buildDirectory = 'views/assets'): self
+    public static function forModule(\Module $module, string $buildDirectory = 'views/assets'): static
     {
-        return new self($module->getLocalPath(), $module->getPathUri(), $buildDirectory);
+        return new static($module->getLocalPath(), $module->getPathUri(), $buildDirectory);
     }
 
     /** Return the public URL for a source entry, or null before assets are built. */

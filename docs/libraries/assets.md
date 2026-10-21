@@ -94,3 +94,6 @@ boilerplate's production builder already includes `views/`.
 The manager follows [Vite's backend integration format](https://vite.dev/guide/backend-integration).
 Run `npm run build` or `npm run dev` from the generated module. Source placeholders
 remain in `_dev/js/` and `_dev/scss/`; the Vite configuration stays in the module.
+
+See the [public API reference](../api.md) for parameters, defaults, return types
+and declared errors, and [extension points](../extensions.md) for replacement strategies.

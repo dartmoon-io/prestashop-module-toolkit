@@ -4,7 +4,7 @@
 
 ## Requirements and installation
 
-The runtime targets PHP 8.1+ and PrestaShop 9.2+. The Config and dispatcher
+The runtime requires PHP 8.1+; the verified host is PrestaShop 9.2.0. The Config and dispatcher
 utilities can be used without a running shop, but hooks need the shop's `Module`
 and `Context`, TabManager needs its database and `Tab` API, and console commands
 need the Symfony Console supplied by PrestaShop.
@@ -69,23 +69,12 @@ Symfony services and commands use the shop's Symfony APIs. The toolkit does
 not bundle a second Symfony runtime; install its development dependencies only
 when working on the toolkit itself.
 
-## Upgrade from the individual packages
+## Supply implementations
 
-Replace the old Composer requirements with the toolkit, keeping the existing
-`Dartmoon\…` imports. Check these API changes in your application:
-
-- Pass the module's config directory explicitly to `Config`; initialize its
-  compatibility facade before calling it.
-- Replace `ContainerAwareCommand`/`getContainer()` with constructor injection
-  and return integer command exit codes.
-- Use canonical hook names and public handlers; match the typed dispatcher
-  contract if implementing it yourself.
-- Load `MultiLangText` through Composer. Its corrected filename is
-  `MultiLangText.php`.
-- Use either TabManager or native `Module::$tabs` for each tab. Check lifecycle
-  return values and handle installation failures.
-
-The library guides describe these behaviors and their examples in detail.
+Inject services using PrestaShop's native Symfony definitions or explicit
+constructors/factories during lifecycle operations. See the
+[extension guide](extensions.md) and [API reference](api.md). Facades require
+an explicit module scope; there is no implicit current-module state.
 
 ## Work on the toolkit
 
@@ -96,6 +85,6 @@ composer install
 composer test
 ```
 
-The tests use small PrestaShop API doubles. Production scoping and real-shop
-integration checks live in the boilerplate repository. Revalidate integration
+The tests use small PrestaShop API doubles. Production scoping checks live in the boilerplate; native component integration
+checks are in this repository under `tests/integration/`. Revalidate integration
 when adopting another PrestaShop release.

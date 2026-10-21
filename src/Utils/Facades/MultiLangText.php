@@ -1,13 +1,22 @@
 <?php
 
+/**
+ * Copyright (c) 2023-2026 Dartmoon S.r.l. <hello@dartmoon.io>
+ * SPDX-License-Identifier: MIT
+ * See LICENSE for the full license text.
+ */
+
 declare(strict_types=1);
 
 namespace Dartmoon\Utils\Facades;
 
-class MultiLangText
+use Dartmoon\Support\Facade;
+
+/** @method static \Dartmoon\Utils\MultiLangText for(object $scope) */
+class MultiLangText extends Facade
 {
-    public static function __callStatic(string $name, array $arguments): mixed
+    protected static function serviceClass(): string
     {
-        return (new \Dartmoon\Utils\MultiLangText())->{$name}(...$arguments);
+        return \Dartmoon\Utils\MultiLangText::class;
     }
 }

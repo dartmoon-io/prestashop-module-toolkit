@@ -1,18 +1,26 @@
 <?php
 
+/**
+ * Copyright (c) 2023-2026 Dartmoon S.r.l. <hello@dartmoon.io>
+ * SPDX-License-Identifier: MIT
+ * See LICENSE for the full license text.
+ */
+
 declare(strict_types=1);
 
 namespace Dartmoon\TabManager;
 
 use Dartmoon\Utils\MultiLangText;
-use InvalidArgumentException;
-use Module;
 use Tab;
 
 /** Uses the public ObjectModel API, including its ACL and cache invalidation. */
 class TabManager
 {
-    public function install(array $tabs, ?Module $module = null): bool
+    public function __construct(private MultiLangText $translations = new MultiLangText())
+    {
+    }
+
+    public function install(array $tabs, ?\Module $module = null): bool
     {
         $created = [];
         $failed = false;
@@ -20,29 +28,29 @@ class TabManager
             foreach ($tabs as $details) {
                 $class = $details['class_name'] ?? '';
                 if (!is_string($class) || !preg_match('/^[A-Za-z][A-Za-z0-9_]{0,63}$/D', $class)) {
-                    throw new InvalidArgumentException('Each tab requires a valid class_name (maximum 64 characters).');
+                    throw new \InvalidArgumentException('Each tab requires a valid class_name (maximum 64 characters).');
                 }
-                $id = (int) Tab::getIdFromClassName($class);
+                $id = (int) \Tab::getIdFromClassName($class);
                 if ($id > 0) {
-                    $tab = new Tab($id);
+                    $tab = new \Tab($id);
                     if ((string) $tab->module !== ($module?->name ?? '')) {
-                        throw new InvalidArgumentException("Tab {$class} belongs to another module.");
+                        throw new \InvalidArgumentException("Tab {$class} belongs to another module.");
                     }
                     continue;
                 }
                 $parent = $details['parent_class_name'] ?? '';
-                $parentId = $parent === '' ? 0 : (int) Tab::getIdFromClassName($parent);
+                $parentId = $parent === '' ? 0 : (int) \Tab::getIdFromClassName($parent);
                 if ($parent !== '' && $parentId === 0) {
-                    throw new InvalidArgumentException("Parent tab {$parent} does not exist; declare parents first.");
+                    throw new \InvalidArgumentException("Parent tab {$parent} does not exist; declare parents first.");
                 }
-                $tab = new Tab();
+                $tab = new \Tab();
                 $tab->class_name = $class;
                 $tab->module = $module?->name ?? '';
                 $tab->id_parent = $parentId;
                 $tab->route_name = $details['route_name'] ?? '';
                 $tab->icon = $details['icon'] ?? '';
                 $tab->active = (bool) ($details['visible'] ?? true);
-                $tab->name = (new MultiLangText())->generate($details['name'] ?? $class);
+                $tab->name = $this->translations->generate($details['name'] ?? $class);
                 $tab->wording = $details['wording'] ?? null;
                 $tab->wording_domain = $details['wording_domain'] ?? null;
                 // Retain the object before save: Tab::add can persist a row
@@ -70,8 +78,8 @@ class TabManager
     {
         $success = true;
         foreach (array_reverse($tabs) as $details) {
-            $id = (int) Tab::getIdFromClassName($details['class_name']);
-            if ($id > 0 && !(new Tab($id))->delete()) {
+            $id = (int) \Tab::getIdFromClassName($details['class_name']);
+            if ($id > 0 && !(new \Tab($id))->delete()) {
                 $success = false;
             }
         }
@@ -79,10 +87,10 @@ class TabManager
         return $success;
     }
 
-    public function uninstallForModule(Module $module): bool
+    public function uninstallForModule(\Module $module): bool
     {
         $tabs = iterator_to_array((function () use ($module) {
-            yield from Tab::getCollectionFromModule($module->name);
+            yield from \Tab::getCollectionFromModule($module->name);
         })());
         // Children before parents, even if database IDs do not reflect the tree.
         $byId = [];

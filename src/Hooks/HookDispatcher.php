@@ -1,12 +1,17 @@
 <?php
 
+/**
+ * Copyright (c) 2023-2026 Dartmoon S.r.l. <hello@dartmoon.io>
+ * SPDX-License-Identifier: MIT
+ * See LICENSE for the full license text.
+ */
+
 declare(strict_types=1);
 
 namespace Dartmoon\Hooks;
 
 use Dartmoon\Hooks\Contracts\HookDispatcher as DispatcherContract;
 use Dartmoon\Hooks\Contracts\HookGroup;
-use InvalidArgumentException;
 
 class HookDispatcher implements DispatcherContract
 {
@@ -16,7 +21,7 @@ class HookDispatcher implements DispatcherContract
     {
         foreach ((array) $group->getHooks() as $hook) {
             if (!is_string($hook) || !preg_match('/^[a-z][a-z0-9_]*$/iD', $hook) || !is_callable([$group, $hook])) {
-                throw new InvalidArgumentException('Each hook must have a public handler with the same name.');
+                throw new \InvalidArgumentException('Each hook must have a public handler with the same name.');
             }
             $key = strtolower($hook);
             $this->hooks[$key] ??= ['name' => $hook, 'handlers' => []];

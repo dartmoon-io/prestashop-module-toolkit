@@ -76,6 +76,8 @@ if (!$model->save()) {
 ```
 
 TabManager uses this helper automatically for each definition's `name` field.
-The compatibility facade `Dartmoon\Utils\Facades\MultiLangText::generate()`
-forwards to a new helper instance. Use Composer autoloading and the correctly
-spelled `MultiLangText` class; do not require the old `MutilLangText.php` filename.
+The scoped facade `Dartmoon\Utils\Facades\MultiLangText::for($module)`
+resolves a helper per scope. Use `swap()` to supply a subclass.
+
+See the [public API reference](../api.md) for parameters, defaults, return types
+and declared errors, and [extension points](../extensions.md) for replacement strategies.

@@ -12,7 +12,6 @@ Create `config/api.php` inside your module:
 
 ```php
 <?php
-
 return [
     'endpoint' => 'https://example.com/api',
     'http' => ['timeout' => 10],
@@ -84,21 +83,20 @@ inside its existing closure. Inject that service into commands or controllers
 through the same Symfony container. In module methods and hook groups, create
 or pass a repository using the module's local path.
 
-## Compatibility facade
-
-If migrating code that uses the static facade, initialize it explicitly:
+## Scoped facade
 
 ```php
 use Dartmoon\Config\Config as Repository;
 use Dartmoon\Config\Facades\Config;
 
-Config::setRepository(new Repository(__DIR__ . '/config'));
-$timeout = Config::get('api.http.timeout', 30);
-Config::setRepository(null); // Reset when needed, for example in tests.
+Config::swap($module, new Repository(__DIR__ . '/config'));
+$timeout = Config::for($module)->get('api.http.timeout', 30);
+Config::forget($module);
 ```
 
-Calls before initialization throw `LogicException`. Prefer instance injection
-when multiple unscoped modules share a process: the facade holds static state.
+A Module scope defaults to its own config directory. Other object scopes must
+be bound explicitly or resolution throws `LogicException`. Prefer constructor
+injection; [scoped facades](../extensions.md) are useful at integration boundaries.
 
 ## API and lifecycle
 
@@ -114,3 +112,6 @@ instance to observe file changes in a long-running process. File names accept
 letters, digits, underscores and hyphens; directory traversal raises
 `InvalidArgumentException`. A file returning a non-array raises
 `UnexpectedValueException`. This library does not write configuration files.
+
+See the [public API reference](../api.md) for parameters, defaults, return types
+and declared errors, and [extension points](../extensions.md) for replacement strategies.

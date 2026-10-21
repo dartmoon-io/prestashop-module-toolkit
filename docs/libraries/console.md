@@ -13,7 +13,6 @@ Create `app/Commands/ShowSettingsCommand.php` in a generated module:
 
 ```php
 <?php
-
 namespace Acme\MyModule\Commands;
 
 use Dartmoon\Config\Config;
@@ -100,3 +99,6 @@ autoload mapping, and the shop container has been rebuilt after service changes.
 For a unit test, construct the command with its dependencies and execute it
 using Symfony's `CommandTester`. The toolkit repository's development
 dependencies include Symfony Console for this purpose.
+
+See the [public API reference](../api.md) for parameters, defaults, return types
+and declared errors, and [extension points](../extensions.md) for replacement strategies.

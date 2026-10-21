@@ -1,10 +1,14 @@
 <?php
 
+/**
+ * Copyright (c) 2023-2026 Dartmoon S.r.l. <hello@dartmoon.io>
+ * SPDX-License-Identifier: MIT
+ * See LICENSE for the full license text.
+ */
+
 declare(strict_types=1);
 
 namespace Dartmoon\Utils;
-
-use Language;
 
 class MultiLangText
 {
@@ -12,7 +16,7 @@ class MultiLangText
     public function generate(string|array $text, ?array $languages = null): array
     {
         $translated = [];
-        foreach ($languages ?? Language::getLanguages(false) as $language) {
+        foreach ($languages ?? \Language::getLanguages(false) as $language) {
             $id = (int) $language['id_lang'];
             if (is_string($text)) {
                 $translated[$id] = $text;

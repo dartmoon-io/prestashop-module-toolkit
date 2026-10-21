@@ -1,5 +1,11 @@
 <?php
 
+/**
+ * Copyright (c) 2023-2026 Dartmoon S.r.l. <hello@dartmoon.io>
+ * SPDX-License-Identifier: MIT
+ * See LICENSE for the full license text.
+ */
+
 declare(strict_types=1);
 
 namespace Dartmoon\Tests;
@@ -14,8 +20,15 @@ final class HooksTest extends TestCase
     public function testCanonicalNamesCaseAndMultipleHandlers(): void
     {
         $group = new class implements HookGroup {
-            public function getHooks() { return 'displayHeader'; }
-            public function displayHeader(array $params) { return $params['text']; }
+            public function getHooks()
+            {
+                return 'displayHeader';
+            }
+
+            public function displayHeader(array $params)
+            {
+                return $params['text'];
+            }
         };
         $dispatcher = new HookDispatcher();
         $dispatcher->register($group);
@@ -26,11 +39,19 @@ final class HooksTest extends TestCase
         self::assertSame('oneone', $dispatcher->dispatch('displayHeader', ['text' => 'one']));
         self::assertNull($dispatcher->dispatch('unknown'));
     }
+
     public function testSingleNonDisplayResultIsPreserved(): void
     {
         $group = new class implements HookGroup {
-            public function getHooks() { return ['filterProduct']; }
-            public function filterProduct(array $params) { return $params; }
+            public function getHooks()
+            {
+                return ['filterProduct'];
+            }
+
+            public function filterProduct(array $params)
+            {
+                return $params;
+            }
         };
         $dispatcher = new HookDispatcher();
         $dispatcher->register($group);
@@ -39,15 +60,55 @@ final class HooksTest extends TestCase
         $this->expectException(\LogicException::class);
         $dispatcher->dispatch('filterProduct', ['id' => 1]);
     }
+
     public function testMissingHandlerFailsAtRegistration(): void
     {
-        $group = new class implements HookGroup { public function getHooks() { return ['missing']; } };
+        $group = new class implements HookGroup {
+            public function getHooks()
+            {
+                return ['missing'];
+            }
+        };
         $this->expectException(\InvalidArgumentException::class);
         (new HookDispatcher())->register($group);
     }
+
+    public function testModuleCanSupplyPreconstructedGroupsAndDispatcher(): void
+    {
+        $group = new class implements HookGroup {
+            public function getHooks()
+            {
+                return ['displayHeader'];
+            }
+
+            public function displayHeader(array $params)
+            {
+                return 'injected';
+            }
+        };
+        $module = new class($group) extends \Module {
+            use HasHookDispatcher;
+
+            protected $hooks = [];
+
+            public function __construct(HookGroup $group)
+            {
+                $this->hooks = [$group];
+            }
+
+            protected function createHookDispatcher(): \Dartmoon\Hooks\Contracts\HookDispatcher
+            {
+                return new HookDispatcher();
+            }
+        };
+        self::assertSame('injected', $module->hookDisplayHeader([]));
+    }
+
     public function testMagicCallsOnlyDispatchHooks(): void
     {
-        $module = new class extends \Module { use HasHookDispatcher; };
+        $module = new class extends \Module {
+            use HasHookDispatcher;
+        };
         self::assertNull($module->hookUnknown([]));
         $this->expectException(\BadMethodCallException::class);
         $module->typo();

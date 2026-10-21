@@ -1,28 +1,31 @@
 <?php
 
+/**
+ * Copyright (c) 2023-2026 Dartmoon S.r.l. <hello@dartmoon.io>
+ * SPDX-License-Identifier: MIT
+ * See LICENSE for the full license text.
+ */
+
 declare(strict_types=1);
 
 namespace Dartmoon\Config\Facades;
 
-use Dartmoon\Config\Config as Repository;
-use LogicException;
+use Dartmoon\Support\Facade;
 
-/** Compatibility facade. Prefer injecting a module-specific Repository. */
-class Config
+/** @method static \Dartmoon\Config\Config for(object $scope) */
+class Config extends Facade
 {
-    private static ?Repository $repository = null;
-
-    public static function setRepository(?Repository $repository): void
+    protected static function serviceClass(): string
     {
-        self::$repository = $repository;
+        return \Dartmoon\Config\Config::class;
     }
 
-    public static function __callStatic(string $name, array $arguments): mixed
+    protected static function create(object $scope): object
     {
-        if (self::$repository === null) {
-            throw new LogicException('Configure the Config facade with setRepository() before use.');
+        if (!$scope instanceof \Module) {
+            throw new \LogicException('Bind a repository with swap() or supply a Module scope.');
         }
 
-        return self::$repository->{$name}(...$arguments);
+        return new \Dartmoon\Config\Config($scope->getLocalPath() . '/config');
     }
 }

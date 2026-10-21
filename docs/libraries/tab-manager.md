@@ -12,7 +12,6 @@ Edit the existing `tabs` entry in `config/module.php`:
 
 ```php
 <?php
-
 // Merge this entry into the existing module metadata array.
 return [
     'tabs' => [
@@ -95,5 +94,10 @@ upgrade script. `install()` alone does not reconcile changed definitions.
 Normal `Tab::save()`/`delete()` behavior supplies the shop's ACL and cache
 handling. Menu visibility does not replace controller permission checks.
 
-For legacy static calls, `Dartmoon\TabManager\Facades\TabManager` forwards calls
-to a new manager instance. The instance API makes dependencies clearer.
+Use `Dartmoon\TabManager\Facades\TabManager::for($module)` for scoped access.
+The constructor accepts a `MultiLangText` instance for custom translation policy.
+In the boilerplate, override `createTabManager()` for lifecycle customization:
+the Symfony container may not be available while installing or uninstalling.
+
+See the [public API reference](../api.md) for parameters, defaults, return types
+and declared errors, and [extension points](../extensions.md) for replacement strategies.

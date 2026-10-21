@@ -1,8 +1,9 @@
 # PrestaShop Module Toolkit
 
 `dartmoon/prestashop-module-toolkit` is the shared runtime package for the
-[module skeleton](https://github.com/dartmoon-io/prestashop-module). It provides Assets, Config, Console, Hooks,
-TabManager and Utils into one Composer dependency, while retaining their
+[module skeleton](https://github.com/dartmoon-io/prestashop-module). It combines assets, configuration, hooks, console commands, tabs, forms,
+renderers, filters, downloaders, logging and catalog import helpers in one
+Composer dependency, while retaining their
 `Dartmoon\…` namespaces. The toolkit contains no module build tools.
 
 ## Documentation
@@ -13,13 +14,19 @@ Start with the [documentation index](docs/README.md) and
 - [Assets](docs/libraries/assets.md)
 - [Config](docs/libraries/config.md)
 - [Console](docs/libraries/console.md)
+- [Filters](docs/libraries/filters.md)
+- [Downloaders](docs/libraries/downloaders.md)
+- [Logging](docs/libraries/logging.md)
+- [Helpers and legacy controllers](docs/libraries/helpers.md)
+- [Catalog and image importers](docs/libraries/importers.md)
+- [Renderers](docs/libraries/renderers.md)
 - [Hooks](docs/libraries/hooks.md)
 - [TabManager](docs/libraries/tab-manager.md)
 - [Utils and multilingual text](docs/libraries/utils.md)
 
 ## Requirements
 
-PHP 8.1+ and PrestaShop 9.2+. Symfony Console is supplied by PrestaShop (6.4 in
+PHP 8.1+ with the tested PrestaShop 9.2.0 host APIs. Symfony Console is supplied by PrestaShop (6.4 in
 9.2); it is a development dependency here, not a second Symfony installation
 inside every module. Future PrestaShop versions require the integration suite
 to be rerun; this package does not claim untested future compatibility.
@@ -31,7 +38,7 @@ composer require dartmoon/prestashop-module-toolkit:^1.0
 Before publication, use a Composer path repository with `symlink: false` and
 `options.versions.dartmoon/prestashop-module-toolkit: 1.0.0`; the skeleton's
 `php bin/module setup --toolkit-path=/path/to/prestashop-module-toolkit` does this.
-The `replace` entries prevent installing the five older packages alongside it.
+Composer `replace` entries prevent duplicate component packages.
 
 ## Components
 
@@ -58,17 +65,14 @@ $value = $config->get('module.api.timeout', 10);
 
 PHP config files return arrays. Dot paths support arbitrary depth and preserve
 explicit `null` and `false`. Files are cached per repository instance and file
-names cannot traverse directories. Inject a repository for each module; paths
-are no longer inferred from vendor directory depth. The compatibility facade
-requires `Config::setRepository($repository)` before use. Avoid a shared facade
-in modules that are loaded without isolation.
+names cannot traverse directories. Inject a repository for each module. Scoped facade access uses
+`Config::for($module)->get(...)`; `swap($module, $repository)` binds a custom instance.
 
 ### Console
 
 Extend `Dartmoon\Console\AbstractCommand`, implement `execute(): int`, and
 register the command as a Symfony service (the skeleton has an example).
-Constructor injection replaces the removed `ContainerAwareCommand` and
-`getContainer()`. `$name` and `$description` remain supported. A custom
+$name and $description are configured by the base command. `$name` and `$description` remain supported. A custom
 constructor must call `parent::__construct()`.
 
 ### Hooks
@@ -111,17 +115,28 @@ Choose this manager or native `Module::$tabs` for each tab, not both.
 `Dartmoon\Utils\MultiLangText::generate()` accepts a string or translation array.
 Resolution uses locale, language code, ISO code, then numeric language ID;
 missing translations use the first provided value. An empty array produces
-empty strings. Disabled languages are included. The filename is now correctly
-`MultiLangText.php`, fixing PSR-4 loading on case-sensitive filesystems.
+empty strings. Disabled languages are included. Load the class using Composer and the case-sensitive `MultiLangText.php` filename.
 
 ## Development
 
 ```sh
 composer install
 composer test
+node --test tests/forms.test.mjs
 ```
 
 Unit tests cover configuration isolation and traversal, hook dispatch and
 return values, console execution, translations, tab ownership, retries,
 rollback and uninstall failures. The skeleton additionally tests production
 scoping and two modules loaded in the same process.
+
+See [extension points](docs/extensions.md), the [complete API reference](docs/api.md)
+and [testing](docs/testing.md). The native integration test exercises catalog
+writes, image rollback, forms, lists and Smarty against a local test shop:
+
+```sh
+php -d memory_limit=1G tests/integration/prestashop.php /path/to/prestashop
+```
+
+It creates temporary catalog records and removes them in `finally`; run it on a
+development installation. FTP failure paths use test doubles without a network server.

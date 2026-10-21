@@ -1,5 +1,11 @@
 <?php
 
+/**
+ * Copyright (c) 2023-2026 Dartmoon S.r.l. <hello@dartmoon.io>
+ * SPDX-License-Identifier: MIT
+ * See LICENSE for the full license text.
+ */
+
 declare(strict_types=1);
 
 namespace Dartmoon\Tests;
@@ -22,13 +28,16 @@ final class ComponentsTest extends TestCase
         self::assertSame([1 => '', 2 => ''], $text->generate([]));
         self::assertSame([1 => 'Default', 2 => 'Default'], $text->generate(['fr' => 'Default']));
     }
+
     public function testModernConsoleCommandRuns(): void
     {
         $command = new class extends AbstractCommand {
             protected $name = 'test:hello';
+
             protected function execute(InputInterface $input, OutputInterface $output): int
             {
                 $output->writeln('Hello');
+
                 return self::SUCCESS;
             }
         };

@@ -1,5 +1,11 @@
 <?php
 
+/**
+ * Copyright (c) 2023-2026 Dartmoon S.r.l. <hello@dartmoon.io>
+ * SPDX-License-Identifier: MIT
+ * See LICENSE for the full license text.
+ */
+
 declare(strict_types=1);
 
 namespace Dartmoon\Tests;
@@ -34,9 +40,19 @@ final class AssetManagerTest extends TestCase
     {
         $directory = $this->directory;
         $module = new class($directory) extends \Module {
-            public function __construct(private string $directory) {}
-            public function getLocalPath(): string { return $this->directory . '/'; }
-            public function getPathUri(): string { return '/shop/modules/a&b/'; }
+            public function __construct(private string $directory)
+            {
+            }
+
+            public function getLocalPath(): string
+            {
+                return $this->directory . '/';
+            }
+
+            public function getPathUri(): string
+            {
+                return '/shop/modules/a&b/';
+            }
         };
         $this->manifest(['front.js' => ['file' => 'front-abc.js']]);
         $assets = AssetManager::forModule($module);
